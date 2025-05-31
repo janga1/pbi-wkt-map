@@ -1,0 +1,90 @@
+{
+    "dataRoles": [
+        {
+            "displayName": "Geometrieën",
+            "name": "geometrieën",
+            "kind": "Grouping"
+        },
+        {
+            "displayName": "Tooltip Data",
+            "name": "tooltip",
+            "kind": "Grouping"
+        }
+    ],
+    "dataViewMappings": [
+        {
+            "table": {
+                "rows": {
+                    "select": [
+                        { "bind": { "to": "geometrieën" } },
+                        { "bind": { "to": "tooltip" } }
+                    ]
+                }
+            }
+        }
+    ],
+    "objects": {
+        "geometrieenCard": {
+            "displayName": "Geometrieën",
+            "properties": {
+                "kleur": {
+                    "displayName": "Vulkleur",
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "transparantie": {
+                    "displayName": "Vulkleur Transparantie",
+                    "type": {
+                        "numeric": true
+                    }
+                },
+                "randkleur": {
+                    "displayName": "Randkleur",
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "randtransparantie": {
+                    "displayName": "Randkleur Transparantie",
+                    "type": {
+                        "numeric": true
+                    }
+                },
+                "randdikte": {
+                    "displayName": "Rand Dikte",
+                    "type": {
+                        "numeric": true
+                    }
+                }
+            }
+        },
+        "tooltipCard": {
+            "properties": {
+                "achtergrondkleur": {
+                    "displayName": "Achtergrond Kleur",
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "privileges": [{
+        "name": "WebAccess",
+        "essential": true,
+        "parameters": [ "https://*.openstreetmap.org"]
+    }]
+}
