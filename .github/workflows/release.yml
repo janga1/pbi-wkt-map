@@ -19,6 +19,9 @@ jobs:
         with:
           node-version: '22'
 
+      - name: Install Power BI Visual Tools (pbiviz)
+        run: npm install -g powerbi-visuals-tools
+
       - name: Install Dependencies
         run: npm install
 
