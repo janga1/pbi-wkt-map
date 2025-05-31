@@ -1,0 +1,41 @@
+name: Build & Release pbiviz
+
+on:
+  push:
+    tags:
+      - 'v*.*.*.*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js (v22)
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Build pbiviz Package
+        run: pbiviz package
+
+      - name: Generate MD5 Hash
+        id: md5
+        run: echo "MD5 Checksum: $(md5sum dist/*.pbiviz | awk '{print $1}')" >> md5.txt
+
+      - name: Read MD5 Hash
+        id: md5_read
+        run: echo "::set-output name=checksum::$(cat md5.txt)"
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: dist/*.pbiviz
+          body: "MD5 Checksum: ${{ steps.md5_read.outputs.checksum }}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
