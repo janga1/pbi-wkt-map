@@ -16,7 +16,7 @@ jobs:
       - name: Set up Node.js (v22)
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: '22'
 
       - name: Install Dependencies
         run: npm install
@@ -26,16 +26,19 @@ jobs:
 
       - name: Generate MD5 Hash
         id: md5
-        run: echo "MD5 Checksum: $(md5sum dist/*.pbiviz | awk '{print $1}')" >> md5.txt
+        run: |
+          CHECKSUM=$(md5sum dist/*.pbiviz | awk '{print $1}')
+          echo "MD5 Checksum: $CHECKSUM" >> md5.txt
 
       - name: Read MD5 Hash
         id: md5_read
-        run: echo "::set-output name=checksum::$(cat md5.txt)"
+        run: echo "checksum=$(cat md5.txt)" >> "$GITHUB_ENV"
+
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
           files: dist/*.pbiviz
-          body: "MD5 Checksum: ${{ steps.md5_read.outputs.checksum }}"
+          body: "MD5 Checksum: ${{ env.checksum }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
