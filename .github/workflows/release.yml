@@ -45,4 +45,4 @@ jobs:
           files: dist/*.pbiviz
           body: "MD5 Checksum: ${{ env.checksum }}"
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.SOME_TOKEN }}
