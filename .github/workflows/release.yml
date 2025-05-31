@@ -27,22 +27,10 @@ jobs:
 
       - name: Build pbiviz Package
         run: pbiviz package
-
-      - name: Generate MD5 Hash
-        id: md5
-        run: |
-          CHECKSUM=$(md5sum dist/*.pbiviz | awk '{print $1}')
-          echo "MD5 Checksum: $CHECKSUM" >> md5.txt
-
-      - name: Read MD5 Hash
-        id: md5_read
-        run: echo "checksum=$(cat md5.txt)" >> "$GITHUB_ENV"
-
-
+        
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
           files: dist/*.pbiviz
-          body: "MD5 Checksum: ${{ env.checksum }}"
         env:
           GITHUB_TOKEN: ${{ secrets.SOME_TOKEN }}
