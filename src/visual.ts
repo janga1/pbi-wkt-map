@@ -41,15 +41,20 @@ export class Visual implements powerbi.extensibility.visual.IVisual {
     }
 
     public update(options: powerbi.extensibility.visual.VisualUpdateOptions) {
-        if (!options.dataViews || options.dataViews.length === 0) return;
+
+        if (!options.dataViews || options.dataViews.length === 0) {
+            // TODO: remove all data
+            return;
+        }
 
         let dataView = options.dataViews[0];
-        this.dataProcessor.extractFormattingSettings(dataView);
 
-        const { tooltipValues } = this.dataProcessor.extractTooltipData(dataView);
-        let wktStrings = dataView.table?.rows?.map(row => row[0].toString()) || [];
+        this.dataProcessor.updateFormattingSettings(dataView);
 
-        let featureCollection = this.dataProcessor.createFeatureCollection(wktStrings, tooltipValues);
+        const wktStrings: string[] = this.dataProcessor.getWKTStrings(dataView);
+
+        let featureCollection = this.dataProcessor.createFeatureCollection(wktStrings);
+        
         this.mapService.updateMap(featureCollection);
     }
 

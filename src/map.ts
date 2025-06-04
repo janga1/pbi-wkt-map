@@ -4,9 +4,9 @@ import * as L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
 const DEFAULT_LOCATION: L.LatLngExpression = [51.562319, 4.783870];
-const DEFAULT_ZOOM = 17;
+const DEFAULT_ZOOM = 18;
 const PREFIX_ATTRIBUTION = '';
-const ATTRIBUTION = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>';
+const ATTRIBUTION = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> Contributers';
 const TILES_URL = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
 
 export class MapService {
@@ -37,21 +37,30 @@ export class MapService {
         });
 
         let layer = L.geoJSON(featureCollection, {
-            style: feature => ({
-                color: feature?.properties.borderColor,
-                fillColor: feature?.properties.fillColor,
-                weight: feature?.properties.borderWidth,
-                opacity: feature?.properties.borderOpacity,
-                fillOpacity: feature?.properties.fillOpacity,
-            }),
-            onEachFeature: (feature, layer) => {
-                layer.bindTooltip(feature.properties.tooltip, {
-                    permanent: false,
-                    direction: "top"
+            pointToLayer: function (feature, latlng) {
+                return L.circleMarker(latlng, {
+                    radius: 5, // Grootte van het punt
+                    // color: "blue",
+                    // fillColor: "blue",
+                    // fillOpacity: 1
                 });
             }
+
+            // style: feature => ({
+            //     color: feature?.properties.borderColor,
+            //     fillColor: feature?.properties.fillColor,
+            //     weight: feature?.properties.borderWidth,
+            //     opacity: feature?.properties.borderOpacity,
+            //     fillOpacity: feature?.properties.fillOpacity,
+            // }),
+            // onEachFeature: (feature, layer) => {
+            //     layer.bindTooltip(feature.properties.tooltip, {
+            //         permanent: false,
+            //         direction: "top"
+            //     });
+            // }
         }).addTo(this.map);
 
-        this.map?.fitBounds(layer.getBounds());
+        this.map?.flyToBounds(layer.getBounds());
     }
 }
