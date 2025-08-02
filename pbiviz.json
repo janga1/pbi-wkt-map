@@ -1,15 +1,15 @@
 {
     "visual": {
-        "name": "kaart",
-        "displayName": "Kaart",
-        "guid": "kaartF4A079C9E3BE4666BFF20A1F38A43923",
+        "name": "WKT Map",
+        "displayName": "WKT Map",
+        "guid": "wktmapF4A079C9E3BE4666BFF20A1F38A43923",
         "visualClassName": "Visual",
         "version": "0.0.0.1",
-        "description": "Een kaart visualisatie om WKT geometrieën op weer te geven.",
-        "supportUrl": "janwieringa.nl",
-        "gitHubUrl": ""
+        "description": "Map to visualize WKT formatted geometries.",
+        "supportUrl": "https://github.com/janga1/pbi-wkt-map",
+        "gitHubUrl": "https://github.com/janga1/pbi-wkt-map"
     },
-    "apiVersion": "5.3.0",
+    "apiVersion": "5.11.0",
     "author": {
         "name": "Jan Wieringa",
         "email": "contact@janwieringa.nl"
