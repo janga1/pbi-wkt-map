@@ -1,90 +1,168 @@
 {
-    "dataRoles": [
-        {
-            "displayName": "Geometrieën",
-            "name": "geometrieën",
-            "kind": "Grouping"
-        },
-        {
-            "displayName": "Tooltip Data",
-            "name": "tooltip",
-            "kind": "Grouping"
-        }
-    ],
-    "dataViewMappings": [
-        {
-            "table": {
-                "rows": {
-                    "select": [
-                        { "bind": { "to": "geometrieën" } },
-                        { "bind": { "to": "tooltip" } }
-                    ]
-                }
-            }
-        }
-    ],
-    "objects": {
-        "geometrieenCard": {
-            "displayName": "Geometrieën",
-            "properties": {
-                "kleur": {
-                    "displayName": "Vulkleur",
-                    "type": {
-                        "fill": {
-                            "solid": {
-                                "color": true
-                            }
-                        }
-                    }
-                },
-                "transparantie": {
-                    "displayName": "Vulkleur Transparantie",
-                    "type": {
-                        "numeric": true
-                    }
-                },
-                "randkleur": {
-                    "displayName": "Randkleur",
-                    "type": {
-                        "fill": {
-                            "solid": {
-                                "color": true
-                            }
-                        }
-                    }
-                },
-                "randtransparantie": {
-                    "displayName": "Randkleur Transparantie",
-                    "type": {
-                        "numeric": true
-                    }
-                },
-                "randdikte": {
-                    "displayName": "Rand Dikte",
-                    "type": {
-                        "numeric": true
-                    }
-                }
-            }
-        },
-        "tooltipCard": {
-            "properties": {
-                "achtergrondkleur": {
-                    "displayName": "Achtergrond Kleur",
-                    "type": {
-                        "fill": {
-                            "solid": {
-                                "color": true
-                            }
-                        }
-                    }
-                }
-            }
-        }
+  "dataRoles": [
+    {
+      "displayName": "Geometries",
+      "name": "geometries",
+      "kind": "Grouping",
+      "description": "The field that contains WKT geometry strings.",
+      "requiredTypes": [{ "text": true }]
     },
-    "privileges": [{
-        "name": "WebAccess",
-        "essential": true,
-        "parameters": [ "https://*.openstreetmap.org"]
-    }]
+    {
+      "displayName": "Labels",
+      "name": "labels",
+      "kind": "GroupingOrMeasure",
+      "description": "Fields to be rendered as overlay labels on geometries.",
+      "requiredTypes": [{ "text": true }, { "numeric": true }]
+    },
+    {
+      "displayName": "Tooltips",
+      "name": "tooltips",
+      "kind": "GroupingOrMeasure",
+      "description": "Fields to be displayed as tooltips for geometries.",
+      "requiredTypes": [{ "text": true }, { "numeric": true }]
+    }
+  ],
+  "dataViewMappings": [
+    {
+      "conditions": [
+        { "geometries": { "min": 1, "max": 1 } }
+      ],
+      "categorical": {
+        "categories": {
+          "for": { "in": "geometries" }
+        },
+        "values": {
+          "select": [
+            { "bind": { "to": "labels" } },
+            { "bind": { "to": "tooltips" } }
+          ]
+        }
+      }
+    }
+  ],
+  "objects": {
+    "geometryCard": {
+      "displayName": "Geometry Styling",
+      "properties": {
+        "fillColor": {
+          "displayName": "Fill Color",
+          "type": { "fill": { "solid": { "color": true } } }
+        },
+        "fillTransparency": {
+          "displayName": "Fill Transparency",
+          "type": { "numeric": true }
+        },
+        "borderColor": {
+          "displayName": "Border Color",
+          "type": { "fill": { "solid": { "color": true } } }
+        },
+        "borderTransparency": {
+          "displayName": "Border Transparency",
+          "type": { "numeric": true }
+        },
+        "borderThickness": {
+          "displayName": "Border Thickness",
+          "type": { "numeric": true }
+        }
+      }
+    },
+    "labelCard": {
+      "displayName": "Label Styling",
+      "properties": {
+        "fontSize": {
+          "displayName": "Font Size",
+          "type": { "numeric": true }
+        },
+        "fontColor": {
+          "displayName": "Font Color",
+          "type": { "fill": { "solid": { "color": true } } }
+        },
+        "backgroundColor": {
+          "displayName": "Background Color",
+          "type": { "fill": { "solid": { "color": true } } }
+        },
+        "backgroundTransparency": {
+          "displayName": "Background Transparency",
+          "type": { "numeric": true }
+        },
+        "textAlign": {
+          "displayName": "Text Alignment",
+          "type": {
+            "enumeration": [
+              { "displayName": "Left", "value": "left" },
+              { "displayName": "Center", "value": "center" },
+              { "displayName": "Right", "value": "right" }
+            ]
+          }
+        }
+      }
+    },
+    "tooltipCard": {
+      "displayName": "Tooltip Styling",
+      "properties": {
+        "fontSize": {
+          "displayName": "Font Size",
+          "type": { "numeric": true }
+        },
+        "fontColor": {
+          "displayName": "Font Color",
+          "type": { "fill": { "solid": { "color": true } } }
+        },
+        "backgroundColor": {
+          "displayName": "Background Color",
+          "type": { "fill": { "solid": { "color": true } } }
+        },
+        "backgroundTransparency": {
+          "displayName": "Background Transparency",
+          "type": { "numeric": true }
+        },
+        "textAlign": {
+          "displayName": "Text Alignment",
+          "type": {
+            "enumeration": [
+              { "displayName": "Left", "value": "left" },
+              { "displayName": "Center", "value": "center" },
+              { "displayName": "Right", "value": "right" }
+            ]
+          }
+        }
+      }
+    },
+    "pointCard": {
+      "displayName": "Point Styling",
+      "properties": {
+        "radius": {
+          "displayName": "Point Radius",
+          "type": { "numeric": true }
+        },
+        "fillColor": {
+          "displayName": "Point Fill Color",
+          "type": { "fill": { "solid": { "color": true } } }
+        },
+        "fillTransparency": {
+          "displayName": "Point Fill Transparency",
+          "type": { "numeric": true }
+        },
+        "borderColor": {
+          "displayName": "Point Border Color",
+          "type": { "fill": { "solid": { "color": true } } }
+        },
+        "borderTransparency": {
+          "displayName": "Point Border Transparency",
+          "type": { "numeric": true }
+        },
+        "borderThickness": {
+          "displayName": "Point Border Thickness",
+          "type": { "numeric": true }
+        }
+      }
+    }
+  },
+  "privileges": [
+    {
+      "name": "WebAccess",
+      "essential": true,
+      "parameters": ["https://*.openstreetmap.org"]
+    }
+  ]
 }
