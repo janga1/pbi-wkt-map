@@ -3,7 +3,7 @@
 import powerbi from "powerbi-visuals-api";
 import { Feature, Geometry, FeatureCollection } from "geojson";
 import { wktToGeoJSON } from "@terraformer/wkt";
-import { VisualFormattingSettingsModel } from "./Settings";
+import { VisualFormattingSettingsModel } from "./settings/Settings";
 
 export class DataProcessor {
     /**
@@ -37,64 +37,8 @@ export class DataProcessor {
                                 labelStrings: string[][],
                                 tooltipStrings: string[][],
                                 settings: VisualFormattingSettingsModel
-                            ): FeatureCollection {
+                            ) {
                                 
-        const features: Feature[] = wktStrings.map((wkt, i) => {
-            let geometry: Geometry | null;
-            try {
-                geometry = wktToGeoJSON(wkt) as Geometry;
-            } catch {
-                geometry = null;
-            }
-
-            const isPoint = geometry?.type === "Point";
-            const radius = Math.max(1, settings.pointCard.radius.value ?? 6);
-
-            return {
-                type: "Feature",
-                geometry,
-                properties: {
-                    // Geometry
-                    fillColor: settings.geometryCard.fillColor.value.value,
-                    fillOpacity: 1 - settings.geometryCard.fillTransparency.value / 100,
-                    borderColor: settings.geometryCard.borderColor.value.value,
-                    borderOpacity: 1 - settings.geometryCard.borderTransparency.value / 100,
-                    borderWidth: settings.geometryCard.borderThickness.value,
-
-                    // Tooltip
-                    tooltipFontSize: settings.tooltipCard.fontSize.value,
-                    tooltipFontColor: settings.tooltipCard.fontColor.value.value,
-                    tooltipBackgroundColor: settings.tooltipCard.backgroundColor.value.value,
-                    tooltipBackgroundOpacity: 1 - settings.tooltipCard.backgroundTransparency.value / 100,
-                    tooltipTextAlign: settings.tooltipCard.textAlign.value,
-
-                    // Label
-                    labelFontSize: settings.labelCard.fontSize.value,
-                    labelFontColor: settings.labelCard.fontColor.value.value,
-                    labelBackgroundColor: settings.labelCard.backgroundColor.value.value,
-                    labelBackgroundOpacity: 1 - settings.labelCard.backgroundTransparency.value / 100,
-                    labelTextAlign: settings.labelCard.textAlign.value,
-
-                    // Point
-                    pointRadius: isPoint ? radius : undefined,
-                    pointFillColor: settings.pointCard.fillColor.value.value,
-                    pointFillOpacity: 1 - settings.pointCard.fillTransparency.value / 100,
-                    pointBorderColor: settings.pointCard.borderColor.value.value,
-                    pointBorderOpacity: 1 - settings.pointCard.borderTransparency.value / 100,
-                    pointBorderWidth: settings.pointCard.borderThickness.value,
-
-                    // Data
-                    labels: labelStrings[i] ?? [],
-                    tooltips: tooltipStrings[i] ?? [],
-                    error: geometry === null ? "Invalid WKT" : undefined
-                }
-            };
-        });
-
-        return {
-            type: "FeatureCollection",
-            features
-        };
     }
 
     /**

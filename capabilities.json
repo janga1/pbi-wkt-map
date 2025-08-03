@@ -69,6 +69,30 @@
         "borderThickness": {
           "displayName": "Border Thickness",
           "type": { "numeric": true }
+        },
+        "pointRadius": {
+          "displayName": "Point Radius",
+          "type": { "numeric": true }
+        },
+        "pointFillColor": {
+          "displayName": "Point Fill Color",
+          "type": { "fill": { "solid": { "color": true } } }
+        },
+        "pointFillTransparency": {
+          "displayName": "Point Fill Transparency",
+          "type": { "numeric": true }
+        },
+        "pointBorderColor": {
+          "displayName": "Point Border Color",
+          "type": { "fill": { "solid": { "color": true } } }
+        },
+        "pointBorderTransparency": {
+          "displayName": "Point Border Transparency",
+          "type": { "numeric": true }
+        },
+        "pointBorderThickness": {
+          "displayName": "Point Border Thickness",
+          "type": { "numeric": true }
         }
       }
     },
@@ -131,35 +155,6 @@
               { "displayName": "Right", "value": "right" }
             ]
           }
-        }
-      }
-    },
-    "pointCard": {
-      "displayName": "Point Styling",
-      "properties": {
-        "radius": {
-          "displayName": "Point Radius",
-          "type": { "numeric": true }
-        },
-        "fillColor": {
-          "displayName": "Point Fill Color",
-          "type": { "fill": { "solid": { "color": true } } }
-        },
-        "fillTransparency": {
-          "displayName": "Point Fill Transparency",
-          "type": { "numeric": true }
-        },
-        "borderColor": {
-          "displayName": "Point Border Color",
-          "type": { "fill": { "solid": { "color": true } } }
-        },
-        "borderTransparency": {
-          "displayName": "Point Border Transparency",
-          "type": { "numeric": true }
-        },
-        "borderThickness": {
-          "displayName": "Point Border Thickness",
-          "type": { "numeric": true }
         }
       }
     }

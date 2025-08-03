@@ -2,7 +2,7 @@
 
 import powerbi from "powerbi-visuals-api";
 import { FormattingSettingsService } from "powerbi-visuals-utils-formattingmodel";
-import { VisualFormattingSettingsModel } from "./Settings";
+import { VisualFormattingSettingsModel } from "./settings/Settings";
 import { MapService } from "./MapService";
 import { wktToGeoJSON } from "@terraformer/wkt";
 import { Feature, FeatureCollection, Geometry } from "geojson";
