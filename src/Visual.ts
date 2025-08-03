@@ -32,41 +32,87 @@ export class Visual implements powerbi.extensibility.visual.IVisual {
             dataView
         );
 
-        // const category = dataView.categorical?.categories?.[0];
-        // const wktStrings = category?.values?.map(val => String(val)) ?? [];
-        // const labelValues = dataView.categorical?.categories?.[0]?.values ?? [];
-        // Veronderstel dat er minstens twee categorische kolommen zijn
-        const categories = dataView.categorical?.categories ?? [];
+        // data kolommen
 
-        // Neem aan: 
-        // - categories[0] bevat WKT strings
-        // - categories[1] bevat label strings
+        const categoryColumns = dataView.categorical?.categories ?? [];
+        const valueColumns = dataView.categorical?.values ?? [];
 
-        const wktCategory = categories[0];
-        const labelCategory = categories[1];
+        // wkts lezen naar string array
 
+        const wktCategory = categoryColumns.find(col => col.source.roles?.geometries);
         const wktStrings = wktCategory?.values?.map(val => String(val)) ?? [];
-        const labelValues = labelCategory?.values?.map(val => String(val)) ?? [];
+
+        // labels tekst of numeriek lezen en samenvoegen in string array
+
+        const labelCategory = categoryColumns.find(col => col.source.roles?.labels);
+        const labelCategoryStrings = labelCategory?.values?.map(val => String(val)) ?? [];
+        const labelValues = valueColumns.find(col => col.source.roles?.labels);
+        const labelValuesStrings = labelValues?.values?.map(val => String(val)) ?? [];
+
+        const labelStrings: string[] = labelCategoryStrings.length > 0 ? labelCategoryStrings : labelValuesStrings;
+
+        // tooltips tekst of numeriek lezen en samenvoegen in string matrix
+
+        // const tooltipCategory = categoryColumns.find(col => col.source.roles?.tooltips);
+        // const tooltipCategoryStrings = tooltipCategory?.values?.map(val => String(val)) ?? [];
+        // const tooltipValues = valueColumns.find(col => col.source.roles?.tooltips);
+        // const tooltipValuesStrings = tooltipValues?.values?.map(val => String(val)) ?? [];
+
+        const tooltipValuesMatrix: string[][] = [];
+
+        // 👉 HIER pakken we ALLE kolommen met role 'tooltips', uit zowel categorieën als values
+        const allTooltipColumns = [...categoryColumns, ...valueColumns].filter(
+            col => col.source.roles?.tooltips
+        );
+
+        // 👉 Zet alle kolomwaarden om naar strings
+        const tooltipColumnStrings: string[][] = allTooltipColumns.map(col => col.values.map(val => String(val)));
+
+        // 🧮 Bepaal het aantal rijen (gebaseerd op de langste kolom)
+        const rowCount = Math.max(...tooltipColumnStrings.map(col => col.length));
+
+        // 🧩 Bouw de matrix: per rij de tooltipwaarden verzamelen
+        for (let i = 0; i < rowCount; i++) {
+            const rowTooltips: string[] = [];
+
+            tooltipColumnStrings.forEach(colVals => {
+                rowTooltips.push(colVals[i] ?? ""); // defensief: geen undefined
+            });
+
+            tooltipValuesMatrix.push(rowTooltips);
+        }
+
+        // tooltip colom namen
+        const tooltipColumnNames: string[] = allTooltipColumns.map(col => col.source.displayName);
+
+
+        // feature array maken
 
         const features: Feature[] = [];
 
         wktStrings.forEach((wkt, idx) => {
             try {
                 const geometry = wktToGeoJSON(wkt) as Geometry;
-                const label = String(labelValues[idx] ?? "");
+                const label = labelStrings[idx] ?? "";
+                const tooltipData = tooltipValuesMatrix[idx] ?? [];
 
                 features.push({
-                type: "Feature",
-                geometry: geometry,
-                properties: {
-                    label: label
-                }
+                    type: "Feature",
+                    geometry,
+                    properties: {
+                        label,
+                        tooltipData,
+                        tooltipNames: tooltipColumnNames
+
+                    }
                 });
+
             } catch (error) {
                 console.warn("WKT parse error:", wkt, error);
             }
         });
 
+        // feature collectie maken
 
         const featureCollection: FeatureCollection = {
             type: "FeatureCollection",

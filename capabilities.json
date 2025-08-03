@@ -10,14 +10,14 @@
     {
       "displayName": "Labels",
       "name": "labels",
-      "kind": "Grouping",
+      "kind": "GroupingOrMeasure",
       "description": "Optioneel label voor geometrie.",
       "requiredTypes": [{ "text": true }, { "numeric": true }]
     },
     {
       "displayName": "Tooltips",
       "name": "tooltips",
-      "kind": "Measure",
+      "kind": "GroupingOrMeasure",
       "description": "Optionele tooltipvelden bij geometrie.",
       "requiredTypes": [{ "text": true }, { "numeric": true }]
     }
@@ -35,11 +35,13 @@
         "categories": {
           "select": [
             { "bind": { "to": "geometries" } },
-            { "bind": { "to": "labels" } }
+            { "bind": { "to": "labels" } },
+            { "bind": { "to": "tooltips" } }
           ]
         },
         "values": {
           "select": [
+            { "bind": { "to": "labels" } },
             { "bind": { "to": "tooltips" } }
           ]
         }
