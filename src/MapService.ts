@@ -4,6 +4,8 @@ import * as L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { FeatureCollection } from "geojson";
 
+import '../style/visual.css';
+
 const DEFAULT_LOCATION: L.LatLngExpression = [51.562319, 4.783870];
 const DEFAULT_ZOOM = 15;
 const TILES_URL = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
@@ -13,6 +15,8 @@ const ATTRIBUTION =
 export class MapService {
   private map: L.Map;
   private geometryLayer: L.Layer | null = null;
+  private labelLayer: L.LayerGroup | null = null;
+
 
   constructor(container: HTMLElement) {
     this.map = this.initMap(container);
@@ -42,7 +46,17 @@ export class MapService {
     }
   }
 
+  public removeLabels(): void {
+    if (this.labelLayer) {
+      this.map.removeLayer(this.labelLayer);
+      this.labelLayer = null;
+    }
+  }
+
+
   public addGeometries(featureCollection: FeatureCollection): void {
+
+    // ADDING GEOMETRIES LAYER TO THE MAP
     this.removeGeometries();
 
     const geoJsonLayer = L.geoJSON(featureCollection, {
@@ -59,6 +73,31 @@ export class MapService {
 
     this.geometryLayer = geoJsonLayer;
     geoJsonLayer.addTo(this.map);
+
+    // ADDING LABEL LAYER TO THE MAP
+    this.removeLabels();
+    this.labelLayer = L.layerGroup();
+
+    featureCollection.features.forEach(feature => {
+      const labelText = feature.properties?.label;
+      if (labelText) {
+        const center = L.geoJSON(feature).getBounds().getCenter();
+
+        const label = L.marker(center, {
+          icon: new L.DivIcon({
+            className: "custom-label",
+            html: labelText,
+            iconSize: [100, 30], // adjust as needed
+            iconAnchor: [50, 15], // center the label
+          }),
+          interactive: false
+        });
+
+        this.labelLayer.addLayer(label);
+      }
+    });
+
+    this.labelLayer.addTo(this.map);
 
     try {
       this.map.flyToBounds(geoJsonLayer.getBounds());

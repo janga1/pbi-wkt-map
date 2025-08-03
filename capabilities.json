@@ -4,36 +4,42 @@
       "displayName": "Geometries",
       "name": "geometries",
       "kind": "Grouping",
-      "description": "The field that contains WKT geometry strings.",
+      "description": "De veld met WKT-geometrie.",
       "requiredTypes": [{ "text": true }]
     },
     {
       "displayName": "Labels",
       "name": "labels",
-      "kind": "GroupingOrMeasure",
-      "description": "Fields to be rendered as overlay labels on geometries.",
+      "kind": "Grouping",
+      "description": "Optioneel label voor geometrie.",
       "requiredTypes": [{ "text": true }, { "numeric": true }]
     },
     {
       "displayName": "Tooltips",
       "name": "tooltips",
-      "kind": "GroupingOrMeasure",
-      "description": "Fields to be displayed as tooltips for geometries.",
+      "kind": "Measure",
+      "description": "Optionele tooltipvelden bij geometrie.",
       "requiredTypes": [{ "text": true }, { "numeric": true }]
     }
   ],
   "dataViewMappings": [
     {
       "conditions": [
-        { "geometries": { "min": 1, "max": 1 } }
+        {
+          "geometries": { "min": 1, "max": 1 },
+          "labels": { "max": 1 },
+          "tooltips": { "max": 10 }
+        }
       ],
       "categorical": {
         "categories": {
-          "for": { "in": "geometries" }
+          "select": [
+            { "bind": { "to": "geometries" } },
+            { "bind": { "to": "labels" } }
+          ]
         },
         "values": {
           "select": [
-            { "bind": { "to": "labels" } },
             { "bind": { "to": "tooltips" } }
           ]
         }

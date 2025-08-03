@@ -32,23 +32,41 @@ export class Visual implements powerbi.extensibility.visual.IVisual {
             dataView
         );
 
-        const category = dataView.categorical?.categories?.[0];
-        const wktStrings = category?.values?.map(val => String(val)) ?? [];
+        // const category = dataView.categorical?.categories?.[0];
+        // const wktStrings = category?.values?.map(val => String(val)) ?? [];
+        // const labelValues = dataView.categorical?.categories?.[0]?.values ?? [];
+        // Veronderstel dat er minstens twee categorische kolommen zijn
+        const categories = dataView.categorical?.categories ?? [];
+
+        // Neem aan: 
+        // - categories[0] bevat WKT strings
+        // - categories[1] bevat label strings
+
+        const wktCategory = categories[0];
+        const labelCategory = categories[1];
+
+        const wktStrings = wktCategory?.values?.map(val => String(val)) ?? [];
+        const labelValues = labelCategory?.values?.map(val => String(val)) ?? [];
 
         const features: Feature[] = [];
 
-        wktStrings.forEach(wkt => {
+        wktStrings.forEach((wkt, idx) => {
             try {
                 const geometry = wktToGeoJSON(wkt) as Geometry;
+                const label = String(labelValues[idx] ?? "");
+
                 features.push({
-                    type: "Feature",
-                    geometry: geometry,
-                    properties: {}
+                type: "Feature",
+                geometry: geometry,
+                properties: {
+                    label: label
+                }
                 });
             } catch (error) {
                 console.warn("WKT parse error:", wkt, error);
             }
         });
+
 
         const featureCollection: FeatureCollection = {
             type: "FeatureCollection",
