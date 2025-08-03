@@ -120,6 +120,9 @@ export class Visual implements powerbi.extensibility.visual.IVisual {
         };
 
         this.mapService.addGeometries(featureCollection);
+        this.mapService.addLabels(featureCollection);
+        this.mapService.addTooltips(featureCollection);
+
     }
 
     public getFormattingModel(): powerbi.visuals.FormattingModel {

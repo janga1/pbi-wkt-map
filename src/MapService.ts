@@ -64,60 +64,33 @@ export class MapService {
 
   public addGeometries(featureCollection: FeatureCollection): void {
 
-    // ADDING GEOMETRIES LAYER TO THE MAP
     this.removeGeometries();
 
-    // const geoJsonLayer = L.geoJSON(featureCollection, {
-    //   pointToLayer: (_, latlng) =>
-    //     L.circleMarker(latlng, {
-    //       radius: 6,
-    //       fillColor: "#3388ff",
-    //       color: "#000",
-    //       weight: 1,
-    //       opacity: 1,
-    //       fillOpacity: 0.6,
-    //     }),
-    // });
     const geoJsonLayer = L.geoJSON(featureCollection, {
-      pointToLayer: (feature, latlng) => {
-        const marker = L.circleMarker(latlng, {
+      pointToLayer: (_, latlng) =>
+        L.circleMarker(latlng, {
           radius: 6,
           fillColor: "#3388ff",
           color: "#000",
           weight: 1,
           opacity: 1,
           fillOpacity: 0.6,
-        });
-
-        const tooltipValues = feature.properties?.tooltipData ?? [];
-        const tooltipNames = feature.properties?.tooltipNames ?? [];
-
-        if (tooltipValues.length > 0) {
-          const tooltipContent = tooltipValues
-            .map((val, i) => {
-              const name = tooltipNames[i] ?? `Field ${i + 1}`;
-              return `<div><strong>${name}:</strong> ${val}</div>`;
-            })
-            .join("");
-
-
-          marker.bindTooltip(tooltipContent, {
-            direction: "top",
-            className: "custom-tooltip",
-            permanent: false,
-            opacity: 0.9
-          });
-        }
-
-        return marker;
-      }
+        })
     });
-
 
     this.geometryLayer = geoJsonLayer;
     geoJsonLayer.addTo(this.map);
 
-    // ADDING LABEL LAYER TO THE MAP
+    try {
+      this.map.flyToBounds(geoJsonLayer.getBounds());
+    } catch {
+      this.map.setView(DEFAULT_LOCATION, DEFAULT_ZOOM);
+    }
+
+  }
+
+  public addLabels(featureCollection: FeatureCollection): void {
+
     this.removeLabels();
     this.labelLayer = L.layerGroup();
 
@@ -142,40 +115,41 @@ export class MapService {
 
     this.labelLayer.addTo(this.map);
 
-    // ADD TOOLTIPS LAYER TO MAP
+  }
+
+  public addTooltips(featureCollection: FeatureCollection): void {
 
     this.removeTooltips();
     this.tooltipLayer = L.layerGroup();
 
     featureCollection.features.forEach((feature) => {
-      const tooltipValues = feature.properties?.tooltipData;
-      if (tooltipValues && tooltipValues.length > 0) {
+      const tooltipValues = feature.properties?.tooltipData ?? [];
+      const tooltipNames = feature.properties?.tooltipNames ?? [];
+
+      if (tooltipValues.length > 0) {
         const center = L.geoJSON(feature).getBounds().getCenter();
+
         const tooltipContent = tooltipValues
-          .map((val, i) => `<div><strong>Field ${i + 1}:</strong> ${val}</div>`)
+          .map((val, i) => {
+            const name = tooltipNames[i] ?? `Field ${i + 1}`;
+            return `<div><strong>${name}:</strong> ${val}</div>`;
+          })
           .join("");
 
         const tooltipMarker = L.marker(center, {
           icon: new L.DivIcon({
             className: "custom-tooltip",
             html: tooltipContent,
-            iconSize: [150, 40],
-            iconAnchor: [75, 20],
+            iconSize: [200, tooltipValues.length * 20 + 20], // dynamisch hoog
+            iconAnchor: [100, tooltipValues.length * 10 + 10]
           }),
-          interactive: false,
+          interactive: false
         });
 
         this.tooltipLayer.addLayer(tooltipMarker);
       }
     });
 
-
-    // DRAW MAP
-
-    try {
-      this.map.flyToBounds(geoJsonLayer.getBounds());
-    } catch {
-      this.map.setView(DEFAULT_LOCATION, DEFAULT_ZOOM);
-    }
+    this.tooltipLayer.addTo(this.map);
   }
 }
