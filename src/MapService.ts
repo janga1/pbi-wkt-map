@@ -118,16 +118,13 @@ export class MapService {
   }
 
   public addTooltips(featureCollection: FeatureCollection): void {
-
     this.removeTooltips();
     this.tooltipLayer = L.layerGroup();
 
-    featureCollection.features.forEach((feature) => {
-      const tooltipValues = feature.properties?.tooltipData ?? [];
-      const tooltipNames = feature.properties?.tooltipNames ?? [];
-
-      if (tooltipValues.length > 0) {
-        const center = L.geoJSON(feature).getBounds().getCenter();
+    L.geoJSON(featureCollection, {
+      pointToLayer: (feature, latlng) => {
+        const tooltipValues = feature.properties?.tooltipData ?? [];
+        const tooltipNames = feature.properties?.tooltipNames ?? [];
 
         const tooltipContent = tooltipValues
           .map((val, i) => {
@@ -136,20 +133,48 @@ export class MapService {
           })
           .join("");
 
-        const tooltipMarker = L.marker(center, {
-          icon: new L.DivIcon({
-            className: "custom-tooltip",
-            html: tooltipContent,
-            iconSize: [200, tooltipValues.length * 20 + 20], // dynamisch hoog
-            iconAnchor: [100, tooltipValues.length * 10 + 10]
-          }),
-          interactive: false
+        const invisibleCircle = L.circleMarker(latlng, {
+          radius: 5, // praktisch onzichtbaar
+          opacity: 0,
+          fillOpacity: 0,
+          weight: 0,
+          interactive: true
+        }).bindTooltip(tooltipContent, {
+          permanent: false,
+          sticky: true,
+          direction: "auto",
+          className: "custom-leaflet-tooltip"
         });
 
-        this.tooltipLayer.addLayer(tooltipMarker);
+        return invisibleCircle;
+      },
+
+      onEachFeature: (feature, layer) => {
+        // Voor niet-point geometrieën (zoals Polygon/LineString)
+        if (feature.geometry.type !== "Point") {
+          const tooltipValues = feature.properties?.tooltipData ?? [];
+          const tooltipNames = feature.properties?.tooltipNames ?? [];
+
+          const tooltipContent = tooltipValues
+            .map((val, i) => {
+              const name = tooltipNames[i] ?? `Field ${i + 1}`;
+              return `<div><strong>${name}:</strong> ${val}</div>`;
+            })
+            .join("");
+
+          layer.bindTooltip(tooltipContent, {
+            permanent: false,
+            sticky: true,
+            direction: "auto",
+            className: "custom-leaflet-tooltip"
+          });
+
+        }
       }
-    });
+    }).addTo(this.tooltipLayer);
 
     this.tooltipLayer.addTo(this.map);
   }
+
+
 }

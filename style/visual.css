@@ -9,9 +9,10 @@
   white-space: nowrap;
 }
 
-.custom-tooltip {
-  background: white;
-  padding: 6px;
+.custom-leaflet-tooltip {
+  background-color: white;
+  border-radius: 4px;
+  padding: 5px 10px;
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.15);
   font-size: 12px;
-  border: 1px solid #ccc;
 }
