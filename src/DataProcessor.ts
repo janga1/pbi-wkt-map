@@ -1,70 +1,118 @@
-"use strict";
-
 import powerbi from "powerbi-visuals-api";
-import { Feature, Geometry, FeatureCollection } from "geojson";
-import { wktToGeoJSON } from "@terraformer/wkt";
-import { VisualFormattingSettingsModel } from "./settings/Settings";
+import { valueFormatter } from "powerbi-visuals-utils-formattingutils";
+
+type ColumnInfo = {
+    columnName: string;
+    displayName: string;
+    primitiveType?: string;
+    formatString?: string;
+    values: (string | number | boolean | Date)[];
+};
+
+type DataObject = {
+    [roleName: string]: {
+        columns: ColumnInfo[];
+    };
+};
 
 export class DataProcessor {
-    /**
-     * Haalt WKT-strings op uit de categorische kolom gekoppeld aan de "geometries"-rol.
-     */
-    public getWKTStrings(dataView: powerbi.DataView): string[] {
-        const categories = dataView?.categorical?.categories ?? [];
-        const geometries = categories.find(c => c.source?.roles?.geometries);
-        return geometries?.values.map(v => v?.toString() ?? "") ?? [];
+    private dataObject: DataObject = {};
+    private locale: string;
+
+    constructor(dataView: powerbi.DataView, host: powerbi.extensibility.visual.IVisualHost) {
+        this.locale = host.locale;
+        this.buildDataObject(dataView);
     }
 
-    /**
-     * Convenience wrapper voor labels.
-     */
-    public getLabelStrings(dataView: powerbi.DataView): string[][] {
-        return this.extractCategoryData(dataView, "labels");
+    public getDisplayNames(role: string): string[] {
+        return this.dataObject[role]?.columns.map((col) => col.displayName) ?? [];
     }
 
-    /**
-     * Convenience wrapper voor tooltips.
-     */
-    public getTooltipStrings(dataView: powerbi.DataView): string[][] {
-        return this.extractCategoryData(dataView, "tooltips");
+    public getValues(role: string): (string | number | boolean | Date)[][] {
+        return this.dataObject[role]?.columns.map((col) => col.values) ?? [];
     }
 
-    /**
-     * Bouwt de GeoJSON FeatureCollection op basis van WKT + data + styling.
-     */
-    public createFeatureCollection(
-                                wktStrings: string[],
-                                labelStrings: string[][],
-                                tooltipStrings: string[][],
-                                settings: VisualFormattingSettingsModel
-                            ) {
-                                
+    public getValuesAsStrings(role: string): string[][] {
+        const columns = this.dataObject[role]?.columns ?? [];
+        return columns.map((col) => col.values.map((val) => val as string));
     }
 
-    /**
-     * Haalt alle categorische kolommen per rol ("labels" / "tooltips"),
-     * vertaalt alles naar strings, groepeert per rij.
-     */
-    private extractCategoryData(
-        dataView: powerbi.DataView,
-        role: "labels" | "tooltips"
-    ): string[][] {
-        const categories = dataView?.categorical?.categories ?? [];
-        const relevant = categories.filter(c => c.source?.roles?.[role]);
-        const rowCount = relevant[0]?.values.length ?? 0;
-        const result: string[][] = Array.from({ length: rowCount }, () => []);
+    public getValuesFormatted(role: string): string[][] {
+        const columns = this.dataObject[role]?.columns ?? [];
+        return columns.map((col) =>
+            col.values.map((val) => this.formatValue(val, col.formatString))
+        );
+    }
 
-        relevant.forEach(c => {
-            c.values.forEach((val, i) => {
-                if (val == null) return;
-                const items = Array.isArray(val) ? val : [val];
-                items.forEach(item => {
-                    const str = item?.toString().trim();
-                    if (str) result[i].push(str);
-                });
+    public getValuesAtIndex(role: string, idx: number): (string | number | boolean | Date)[] {
+        return this.dataObject[role]?.columns.map((col) => col.values[idx]) ?? [];
+    }
+
+    public getValuesFormattedAtIndex(role: string, idx: number): string[] {
+        const columns = this.dataObject[role]?.columns ?? [];
+        return columns.map((col) => this.formatValue(col.values[idx], col.formatString));
+    }
+
+    private buildDataObject(dataView: powerbi.DataView): void {
+        const categorical = dataView?.categorical;
+        if (!categorical) return;
+
+        const allColumns = [...(categorical.categories ?? []), ...(categorical.values ?? [])];
+
+        for (const col of allColumns) {
+            const roleNames = Object.keys(col.source.roles ?? {});
+
+            for (const roleName of roleNames) {
+                if (!this.dataObject[roleName]) {
+                    this.dataObject[roleName] = { columns: [] };
+                }
+
+                const alreadyAdded = this.dataObject[roleName].columns.some(
+                    (existing) => existing.columnName === col.source.queryName
+                );
+
+                if (!alreadyAdded) {
+                    this.dataObject[roleName].columns.push({
+                        columnName: col.source.queryName,
+                        displayName: col.source.displayName,
+                        primitiveType: DataProcessor.getColumnType(col.source.type),
+                        formatString: col.source.format,
+                        values: col.values,
+                    });
+                }
+            }
+        }
+    }
+
+    private static getColumnType(type: powerbi.ValueTypeDescriptor): string {
+        if (type.text) return "Text";
+        if (type.numeric) return "Numeric";
+        if (type.integer) return "Integer";
+        if (type.bool) return "Boolean";
+        if (type.dateTime) return "DateTime";
+        if (type.duration) return "Duration";
+        if (type.binary) return "Binary";
+
+        if (type.geography?.latitude) return "Latitude";
+        if (type.geography?.longitude) return "Longitude";
+        if (type.misc?.imageUrl) return "ImageUrl";
+        if (type.misc?.webUrl) return "WebUrl";
+
+        return "Unknown";
+    }
+
+    private formatValue(value: any, formatString?: string): string {
+        if (value == null) return "";
+
+        if (formatString) {
+            const formatter = valueFormatter.create({
+                format: formatString,
+                cultureSelector: this.locale,
             });
-        });
+            return formatter.format(value);
+        }
 
-        return result;
+        if (value instanceof Date) return value.toISOString();
+        return value.toString();
     }
 }
